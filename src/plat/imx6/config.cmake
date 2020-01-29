@@ -14,9 +14,9 @@ cmake_minimum_required(VERSION 3.7.2)
 
 declare_platform(imx6 KernelPlatImx6 PLAT_IMX6 KernelSel4ArchAarch32)
 
-set(c_configs PLAT_SABRE PLAT_WANDQ)
-set(cmake_configs KernelPlatformSabre KernelPlatformWandQ)
-set(plat_lists sabre wandq)
+set(c_configs PLAT_SABRE PLAT_WANDQ PLAT_IMX6ULL_EVK)
+set(cmake_configs KernelPlatformSabre KernelPlatformWandQ KernelPlatformImx6ull-evk)
+set(plat_lists sabre wandq imx6ull-evk)
 foreach(config IN LISTS cmake_configs)
     unset(${config} CACHE)
 endforeach()
@@ -41,6 +41,9 @@ if(KernelPlatImx6)
         list(APPEND KernelDTSList "src/plat/imx6/mcs-overlay-imx6.dts")
         set(timer_file drivers/timer/arm_global.h)
         set(timer_freq 498000000llu)
+    elseif(KernelPlatformImx6ull-evk)
+        set(timer_file drivers/timer/arm_generic.h)
+        set(timer_freq 400000000llu)
     else()
         set(timer_file drivers/timer/arm_priv.h)
         set(timer_freq 400000000llu)
@@ -58,8 +61,14 @@ if(KernelPlatImx6)
         TIMER_PRECISION 2u
     )
 endif()
-
+if(KernelPlatformImx6ull-evk)
+    add_sources(
+        DEP "KernelPlatImx6"
+        CFILES src/arch/arm/machine/l2c_nop.c src/arch/arm/machine/gic_v2.c
+    )
+else()
 add_sources(
     DEP "KernelPlatImx6"
     CFILES src/arch/arm/machine/l2c_310.c src/arch/arm/machine/gic_v2.c
 )
+endif()
